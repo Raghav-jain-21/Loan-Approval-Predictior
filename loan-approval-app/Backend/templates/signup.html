@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+     <html lang="en">
+     <head>
+         <meta charset="UTF-8">
+         <meta name="viewport" content="width=device-width, initial-scale=1.0">
+         <title>Financial Assistant Hub - Signup</title>
+         <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+         <style>
+             * { box-sizing: border-box; margin: 0; padding: 0; }
+             body { font-family: 'Poppins', sans-serif; background: linear-gradient(135deg, #f0f4f8, #ffffff); display: flex; justify-content: center; align-items: center; min-height: 100vh; color: #1e293b; }
+             .login-container { background: #ffffff; padding: 30px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1); width: 100%; max-width: 400px; text-align: center; }
+             .login-container h2 { font-size: 2rem; font-weight: 600; margin-bottom: 20px; color: #1e293b; }
+             .form-group { margin-bottom: 1.5rem; text-align: left; }
+             .form-group label { display: block; font-size: 1rem; color: #1e293b; margin-bottom: 0.25rem; }
+             .form-group input { width: 100%; padding: 0.5rem; border: 1px solid #d1d5db; border-radius: 6px; font-size: 1rem; transition: border-color 0.3s ease; }
+             .form-group input:focus { border-color: #3b82f6; outline: none; box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2); }
+             .main-btn { display: flex; align-items: center; justify-content: center; gap: 8px; padding: 10px 20px; background: #3b82f6; color: #ffffff; border: none; border-radius: 8px; font-size: 1rem; font-weight: 600; cursor: pointer; transition: all 0.3s ease; width: 100%; margin-top: 10px; }
+             .main-btn:hover { background: #2563eb; transform: translateY(-3px); }
+             .main-btn:disabled { background: #9ca3af; cursor: not-allowed; }
+             .link { margin-top: 15px; font-size: 0.9rem; color: #64748b; }
+             .link a { color: #3b82f6; text-decoration: none; }
+             .link a:hover { text-decoration: underline; }
+             .error { color: #dc2626; font-size: 0.9rem; margin-top: 10px; }
+         </style>
+     </head>
+     <body>
+         <div class="login-container">
+             <h2>Sign Up</h2>
+             {% if error %}
+                 <div class="error">{{ error }}</div>
+             {% endif %}
+             <form method="POST" action="">
+                 <div class="form-group">
+                     <label for="email">Email</label>
+                     <input type="email" id="email" name="email" placeholder="Enter your email" required>
+                 </div>
+                 <div class="form-group">
+                     <label for="password">Password</label>
+                     <input type="password" id="password" name="password" placeholder="Enter your password" required>
+                 </div>
+                 <div class="form-group">
+                     <label for="confirm_password">Confirm Password</label>
+                     <input type="password" id="confirm_password" name="confirm_password" placeholder="Confirm your password" required>
+                 </div>
+                 <input type="submit" value="Sign Up" class="main-btn">
+             </form>
+             <div class="link">
+                 Already have an account? <a href="{{ url_for('login') }}">Login here</a>
+             </div>
+         </div>
+     </body>
+     </html>

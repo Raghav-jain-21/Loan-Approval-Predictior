@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Loan Prediction Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        .truncate {
+            max-width: 0;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        th, td {
+            word-break: break-word;
+            max-width: 180px;
+        }
+        .container {
+            max-width: 1300px;
+            margin: 20px auto;
+            min-height: 80vh;
+            padding: 30px;
+            position: relative;
+            overflow: hidden;
+            background: #000;
+        }
+        body {
+            min-height: 120vh;
+            background: #000;
+            margin: 0;
+        }
+        .rupee-particle {
+            position: absolute;
+            font-size: 12px;
+            opacity: 0;
+            pointer-events: none;
+            animation: floatRandom 15s linear infinite;
+        }
+        @keyframes floatRandom {
+            0% { 
+                transform: translateX(0) translateY(100%);
+                opacity: 0;
+            }
+            20% { opacity: 0.8; }
+            100% { 
+                transform: translateX(calc((Math.random() - 0.5) * 200px)) translateY(-100%);
+                opacity: 0;
+            }
+        }
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 20px;
+            margin-top: 20px;
+            position: relative;
+            z-index: 1;
+        }
+        @media (min-width: 768px) {
+            .dashboard-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+        .chart-card {
+            background-color: rgba(255, 255, 255, 0.9);
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            transition: box-shadow 0.3s ease;
+            min-height: 500px;
+        }
+        .chart-card:hover {
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+        }
+        #featureChart, #approvalChart {
+            max-width: 100%;
+            height: 450px !important;
+        }
+    </style>
+</head>
+<body>
+    <div class="container mx-auto p-6 bg-white rounded-xl shadow-2xl w-full">
+        <script>
+            function createRupeeParticles(count) {
+                const container = document.querySelector('.container');
+                const colors = ['#10b981', '#3b82f6', '#facc15', '#ef4444']; // green, blue, yellow, red
+                for (let i = 0; i < count; i++) {
+                    const particle = document.createElement('div');
+                    particle.className = 'rupee-particle';
+                    particle.textContent = '₹';
+                    const size = Math.random() * 12 + 12 + 'px'; // Random size between 12px and 24px
+                    particle.style.fontSize = size;
+                    particle.style.left = Math.random() * 100 + '%'; // Random horizontal start
+                    particle.style.top = '100%'; // Start from bottom
+                    particle.style.color = colors[Math.floor(Math.random() * colors.length)]; // Random color
+                    container.appendChild(particle);
+
+                    // Remove and recreate particle on each iteration
+                    particle.addEventListener('animationiteration', () => {
+                        particle.remove();
+                        createSingleParticle(container, colors);
+                    });
+                }
+            }
+
+            function createSingleParticle(container, colors) {
+                const particle = document.createElement('div');
+                particle.className = 'rupee-particle';
+                particle.textContent = '₹';
+                const size = Math.random() * 12 + 12 + 'px';
+                particle.style.fontSize = size;
+                particle.style.left = Math.random() * 100 + '%';
+                particle.style.top = '100%';
+                particle.style.color = colors[Math.floor(Math.random() * colors.length)];
+                particle.style.animationDelay = Math.random() * 5 + 's';
+                container.appendChild(particle);
+
+                particle.addEventListener('animationiteration', () => {
+                    particle.remove();
+                    createSingleParticle(container, colors);
+                });
+            }
+
+            // Initial creation of 40 particles
+            document.addEventListener('DOMContentLoaded', () => {
+                createRupeeParticles(40);
+            });
+        </script>
+        <h1 class="text-3xl font-extrabold text-gray-900 text-center mb-6 border-b-2 border-gray-200 pb-4">Loan Prediction Dashboard</h1>
+        <h2 class="text-xl font-semibold text-gray-700 mb-4">Recent Predictions</h2>
+        <table class="w-full text-left border-collapse">
+            <thead>
+                <tr class="bg-gray-100">
+                    <th class="p-2 border-b text-sm font-medium">Time</th>
+                    <th class="p-2 border-b text-sm font-medium">Age</th>
+                    <th class="p-2 border-b text-sm font-medium">Income</th>
+                    <th class="p-2 border-b text-sm font-medium">Exp.</th>
+                    <th class="p-2 border-b text-sm font-medium">Loan</th>
+                    <th class="p-2 border-b text-sm font-medium">Rate</th>
+                    <th class="p-2 border-b text-sm font-medium">Credit</th>
+                    <th class="p-2 border-b text-sm font-medium">Defaults</th>
+                    <th class="p-2 border-b text-sm font-medium">Gender</th>
+                    <th class="p-2 border-b text-sm font-medium">Education</th>
+                    <th class="p-2 border-b text-sm font-medium">Home</th>
+                    <th class="p-2 border-b text-sm font-medium">Intent</th>
+                    <th class="p-2 border-b text-sm font-medium">Prediction</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for pred in predictions %}
+                    <tr class="hover:bg-gray-50">
+                        <td class="p-2 border-b text-sm truncate">{{ pred[0].split()[1] }}</td>
+                        <td class="p-2 border-b text-sm">{{ pred[1] }}</td>
+                        <td class="p-2 border-b text-sm">{{ pred[2] }}</td>
+                        <td class="p-2 border-b text-sm">{{ pred[3] }}</td>
+                        <td class="p-2 border-b text-sm">{{ pred[4] }}</td>
+                        <td class="p-2 border-b text-sm">{{ pred[5] }}</td>
+                        <td class="p-2 border-b text-sm">{{ pred[6] }}</td>
+                        <td class="p-2 border-b text-sm">{{ pred[7] }}</td>
+                        <td class="p-2 border-b text-sm">{{ pred[8] }}</td>
+                        <td class="p-2 border-b text-sm">{{ pred[9] }}</td>
+                        <td class="p-2 border-b text-sm">{{ pred[10] }}</td>
+                        <td class="p-2 border-b text-sm">{{ pred[11] }}</td>
+                        <td class="p-2 border-b text-sm {% if pred[12] == 'Approved' %}text-green-600{% else %}text-red-600{% endif %}">{{ pred[12] }}</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        <div class="dashboard-grid">
+            <div class="chart-card">
+                <h2 class="text-xl font-semibold text-gray-700 mb-4">Feature Importance</h2>
+                <canvas id="featureChart"></canvas>
+            </div>
+            <div class="chart-card">
+                <h2 class="text-xl font-semibold text-gray-700 mb-4">Approval Rate</h2>
+                <canvas id="approvalChart"></canvas>
+            </div>
+        </div>
+        <a href="/" class="mt-6 inline-block px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition duration-200">Back to Prediction</a>
+    </div>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Sample feature importance data (replace with your actual data)
+            const featureData = {
+                labels: ['person_income', 'person_credit_score', 'loan_amnt', 'person_home_ownership_RENT', 'loan_intent_PERSONAL', 'person_emp_exp', 'person_gender_Male', 'person_education_High School', 'previous_loan_defaults_No', 'person_age', 'person_home_ownership_OWN', 'loan_intent_EDUCATION', 'person_education_Bachelor', 'person_education_Master', 'person_gender_Female'],
+                datasets: [{
+                    label: 'Importance',
+                    data: [0.35, 0.25, 0.15, 0.10, 0.05, 0.04, 0.03, 0.02, 0.01, 0.01, 0.01, 0.01, 0.01, 0.01, 0.01],
+                    backgroundColor: 'rgba(59, 130, 246, 0.6)',
+                    borderColor: 'rgba(59, 130, 246, 1)',
+                    borderWidth: 1
+                }]
+            };
+
+            const featureCtx = document.getElementById('featureChart').getContext('2d');
+            new Chart(featureCtx, {
+                type: 'bar',
+                data: featureData,
+                options: {
+                    indexAxis: 'y',
+                    scales: {
+                        x: {
+                            beginAtZero: true,
+                            max: 1,
+                            title: {
+                                display: true,
+                                text: 'Importance'
+                            }
+                        },
+                        y: {
+                            ticks: {
+                                font: {
+                                    size: 12
+                                }
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    },
+                    maintainAspectRatio: false,
+                    layout: {
+                        padding: {
+                            top: 10,
+                            bottom: 10
+                        }
+                    }
+                }
+            });
+
+            // Approval rate data
+            const approvalRate = {{ approval_rate|float }};
+            const approvalCtx = document.getElementById('approvalChart').getContext('2d');
+            new Chart(approvalCtx, {
+                type: 'pie',
+                data: {
+                    labels: ['Approved', 'Rejected'],
+                    datasets: [{
+                        data: [approvalRate, 100 - approvalRate],
+                        backgroundColor: ['#10b981', '#dc2626'],
+                        borderWidth: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                font: { size: 14 }
+                            }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    let label = context.label || '';
+                                    let value = context.parsed || 0;
+                                    return `${label}: ${value}%`;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        });
+    </script>
+</body>
+</html>
